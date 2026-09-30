@@ -6,6 +6,7 @@
 ]]
 
 if not GathererDB then GathererDB = {} end
+GathererDB.Wowhead = nil
 
 local ADDON = "GathererDB_Sirus"
 local SOURCE = "DB Sirus"
