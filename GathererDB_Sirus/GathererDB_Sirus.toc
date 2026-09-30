@@ -1,9 +1,9 @@
 ## Interface: 30300
-## Title: GathererDB: Wowhead
+## Title: GathererDB: Sirus
 ## Notes: Preloaded gathering node database for Gatherer
 ## Notes-ruRU: Готовая база точек сбора для Gatherer Sirus
-## Version: 2.0
+## Version: 2.2
 ## RequiredDeps: Gatherer
 
-DB_WowheadMain.lua
-DB_WowheadData.lua
+DB_SirusMain.lua
+DB_SirusData.lua

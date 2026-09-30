@@ -1,5 +1,5 @@
 --[[
-	Portions of data included here may belong to either Wowhead or Blizzard.
+	Portions of data included here may belong to Blizzard.
 	Code in this file is hereby released into the Public Domain.
 	No warranty of merchantability or fitness of purpose is provided or
 	implied. Use this code at your own risk.
@@ -7,8 +7,12 @@
 
 if not GathererDB then GathererDB = {} end
 
+local ADDON = "GathererDB_Sirus"
+local SOURCE = "DB Sirus"
+local VERSION_KEY = "db.sirus.version"
+
 local lib = {}
-GathererDB.Wowhead = lib
+GathererDB.Sirus = lib
 
 lib.isLoading = true
 if not Gatherer then lib.isLoading = false
@@ -16,12 +20,12 @@ elseif not Gatherer.Api then lib.isLoading = false
 elseif not Gatherer.Api.AddGather then lib.isLoading = false
 elseif not Gatherer.ZoneTokens then lib.isLoading = false
 elseif not Gatherer.Config.AddCallback then
-	DEFAULT_CHAT_FRAME:AddMessage("GathererDB_Wowhead: Please upgrade to the latest version of Gatherer.")
+	DEFAULT_CHAT_FRAME:AddMessage(ADDON..": Please upgrade to the latest version of Gatherer.")
 	lib.isLoading = false
 end
 
 if not lib.isLoading then
-	DEFAULT_CHAT_FRAME:AddMessage("GathererDB_Wowhead: Not loading due to missing or old Gatherer.")
+	DEFAULT_CHAT_FRAME:AddMessage(ADDON..": Not loading due to missing or old Gatherer.")
 	return
 end
 
@@ -32,8 +36,8 @@ if GetLocale() == "ruRU" then
 	L["Perform import of node DB v%s:"] = "Импорт базы точек сбора, версия %s:"
 	L["Import"] = "Импортировать"
 	L["Importing node database:"] = "Идёт импорт базы точек:"
-	L["GathererDB_Wowhead: import finished, %d new nodes, %d already known."] = "GathererDB_Wowhead: импорт завершён, новых точек: %d, уже известных: %d."
-	L["GathererDB_Wowhead: import stopped by an error: %s"] = "GathererDB_Wowhead: импорт остановлен из-за ошибки: %s"
+	L["%s: import finished, %d new nodes, %d already known."] = "%s: импорт завершён, новых точек: %d, уже известных: %d."
+	L["%s: import stopped by an error: %s"] = "%s: импорт остановлен из-за ошибки: %s"
 end
 
 local Objects = Gatherer.Nodes.Objects
@@ -95,6 +99,7 @@ local function beginImport()
 	for zone, zonedef in pairs(zonelut) do
 		local c,z = unpack(zonedef)
 		for node, ntype in pairs(Gatherer.Nodes.Objects) do
+			Gatherer.Storage.RemoveGather(c, z, node, SOURCE)
 			Gatherer.Storage.RemoveGather(c, z, node, "DB:Sirus")
 		end
 		if debugprofilestop() > deadline then
@@ -112,7 +117,7 @@ local function beginImport()
 				for pos, coord in ipairs(ndata) do
 					local x = math.floor(coord/1000)/1000
 					local y = (coord%1000)/1000
-					local success = Gatherer.Api.AddGather(id, nil, nil, 'DB:Sirus', nil, nil, false, c, z, x, y)
+					local success = Gatherer.Api.AddGather(id, nil, nil, SOURCE, nil, nil, false, c, z, x, y)
 					if success then
 						stored = stored + 1
 					end
@@ -128,7 +133,8 @@ local function beginImport()
 	end
 
 	resumeDisplays()
-	Gatherer.Util.ChatPrint(L["GathererDB_Wowhead: import finished, %d new nodes, %d already known."]:format(stored, position - stored))
+	Gatherer.Settings[VERSION_KEY] = GetAddOnMetadata(ADDON, "Version")
+	Gatherer.Util.ChatPrint(L["%s: import finished, %d new nodes, %d already known."]:format(ADDON, stored, position - stored))
 end
 
 function lib:PerformImport()
@@ -151,7 +157,7 @@ function lib:PerformImport()
 			local ok, err = coroutine.resume(co)
 			if not ok then
 				resumeDisplays()
-				Gatherer.Util.ChatPrint(L["GathererDB_Wowhead: import stopped by an error: %s"]:format(tostring(err)))
+				Gatherer.Util.ChatPrint(L["%s: import stopped by an error: %s"]:format(ADDON, tostring(err)))
 			end
 			if not ok or coroutine.status(co) == "dead" then
 				self:Hide()
@@ -215,7 +221,7 @@ local function setupGui(gui)
 		GathererDB.guiId = id
 	end
 
-	local version = GetAddOnMetadata("GathererDB_Wowhead", "Version")
+	local version = GetAddOnMetadata(ADDON, "Version")
 	gui:AddControl(id, "Subhead",    0,    L["Perform import of node DB v%s:"]:format(version))
 
 	local buttonFrame = CreateFrame("Frame", nil, gui.tabs[id][3])
@@ -227,7 +233,7 @@ local function setupGui(gui)
 	button:SetScript("OnClick", lib.PerformImport)
 	button:SetText(L["Import"])
 end
-Gatherer.Config.AddCallback("GathererDB_Wowhead", setupGui)
+Gatherer.Config.AddCallback(ADDON, setupGui)
 
 local defaultIcon = {
 	HERB = "Herb\\Silverleaf",
@@ -240,6 +246,8 @@ local nameIcons = {
 	{ "Herb\\FrostLotus", "лотос", "Лотос" },
 	{ "Mine\\Saronite", "саронит", "Саронит" },
 	{ "UngoroCrystal", "кристалл", "Кристалл" },
+	{ "Open\\Egg", "Гнездо", "Яйца" },
+	{ "Open\\Barrel", "Бидон" },
 }
 
 local function iconFor(gtype, name)
@@ -324,12 +332,17 @@ end
 
 local events = CreateFrame("Frame")
 events:RegisterEvent("ADDON_LOADED")
+events:RegisterEvent("PLAYER_LOGIN")
 events:RegisterEvent("PLAYER_LOGOUT")
 events:SetScript("OnEvent", function(self, event, name)
 	if event == "ADDON_LOADED" then
-		if name:lower() == "gathererdb_wowhead" then
+		if name:lower() == ADDON:lower() then
 			self:UnregisterEvent("ADDON_LOADED")
 			fixNodes()
+		end
+	elseif event == "PLAYER_LOGIN" then
+		if Gatherer.Settings[VERSION_KEY] ~= GetAddOnMetadata(ADDON, "Version") then
+			lib:PerformImport()
 		end
 	else
 		resumeDisplays()
