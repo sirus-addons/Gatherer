@@ -1,9 +1,0 @@
-## Interface: 30300
-## Title: GathererDB: Sirus
-## Notes: Preloaded gathering node database for Gatherer
-## Notes-ruRU: Готовая база точек сбора для Gatherer Sirus
-## Version: 2.2
-## RequiredDeps: Gatherer
-
-DB_SirusMain.lua
-DB_SirusData.lua
