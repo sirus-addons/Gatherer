@@ -59,7 +59,7 @@ local function getDefault(setting)
 	if (setting == "minimap.iconsize")  then return 12      end
 	if (setting == "minimap.distance")  then return 800     end
 	if (setting == "miniicon.angle")    then return 270     end
-	if (setting == "miniicon.distance") then return 12      end
+	if (setting == "miniicon.distance") then return 10      end
 	if (setting == "fade.distance")     then return 500     end
 	if (setting == "fade.percent")      then return 20      end
 	if (setting == "track.circle")      then return true    end
