@@ -4,10 +4,10 @@
 ## Title-frFR: Gatherer
 ## Title-deDE: Gatherer
 ## 
-## Notes: Gatherer, displays stuff you gather in your minimap and world map
-## Notes-frFR: Gatherer, affiche les objets recoltes dans la minicarte et la carte du monde
-## Notes-deDE: Gatherer, zeigt gesammelte Krauter und Erze auf der Minikarte und Weltkarte an
-## Notes-ruRU: Gatherer, отображает собранное на миникарте и карте мира
+## Notes: |@Version: 1@|Gatherer, displays stuff you gather in your minimap and world map
+## Notes-frFR: |@Version: 1@|Gatherer, affiche les objets recoltes dans la minicarte et la carte du monde
+## Notes-deDE: |@Version: 1@|Gatherer, zeigt gesammelte Krauter und Erze auf der Minikarte und Weltkarte an
+## Notes-ruRU: |@Version: 1@|Gatherer, отображает собранное на миникарте и карте мира
 ## 
 ## Version: 3.1.15
 ## Author: Norganna

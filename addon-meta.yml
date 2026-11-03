@@ -1,0 +1,5 @@
+name: Gatherer
+description: README.md
+version: 1
+category: 15
+directories: ["Gatherer", "Gatherer_HUD"]
